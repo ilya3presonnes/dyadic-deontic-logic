@@ -12,8 +12,6 @@ begin
   abbreviation(input) "symmetric \<equiv> \<lambda>R::\<R>. \<forall>x y. R x y \<longrightarrow> R y x"
   abbreviation(input) "transitive       \<equiv> \<lambda>R::\<R>. \<forall>x y z. (R x y \<and> R y z)  \<longrightarrow> R x z"
 
-  datatype A = Nil | Cons 
-
   datatype DDL = Atom \<P> ("_\<^sup>d") | Neg DDL ("\<not>\<^sup>d") | Impl DDL DDL (infixr "\<rightarrow>\<^sup>d" 93) | Box DDL ("\<box>\<^sup>d") | Circ DDL DDL ("\<circle>\<^sup>d'(_'/_')")
   \<comment>\<open>Logical connectives\<close>
   definition Or (infixr "\<or>\<^sup>d" 92) where "\<phi> \<or>\<^sup>d \<psi> \<equiv> \<not>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<psi>"
