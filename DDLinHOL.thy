@@ -32,4 +32,8 @@ begin
   | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d (\<box>\<^sup>d\<phi>)) = (\<forall>t::\<w>.((W t = True) \<longrightarrow> \<langle>W,R,V\<rangle>,t \<Turnstile>\<^sup>d \<phi>))"
   \<comment> \<open>Here the we quantify over all worlds, not over the world set W. Should we switch it?\<close>
   | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>)) = (\<forall>s::\<w>.((\<langle>W,R,V\<rangle>,s\<Turnstile>\<^sup>d\<phi>) \<and> (\<forall>t::\<w>.((\<langle>W,R,V\<rangle>,t\<Turnstile>\<^sup>d\<phi>) \<longrightarrow> R s t)) \<longrightarrow> (\<langle>W,R,V\<rangle>,s \<Turnstile>\<^sup>d \<psi>)))"
+
+  \<comment> \<open>The proposition is provable if it is derivable using the rule schema or is an axiom schema\<close>
+inductive provable :: "DDL \<Rightarrow> bool" ("\<turnstile>\<^sup>d _") where
+    mp : "\<turnstile>\<^sup>d \<phi> \<Longrightarrow> \<turnstile>\<^sup>d (\<phi> \<rightarrow>\<^sup>d \<psi>) \<Longrightarrow> \<turnstile>\<^sup>d \<psi>"
 end
