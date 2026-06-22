@@ -12,16 +12,20 @@ begin
   abbreviation(input) "symmetric \<equiv> \<lambda>R::\<R>. \<forall>x y. R x y \<longrightarrow> R y x"
   abbreviation(input) "transitive       \<equiv> \<lambda>R::\<R>. \<forall>x y z. (R x y \<and> R y z)  \<longrightarrow> R x z"
 
+  \<comment> \<open>Syntax of DDL\<close>
   datatype DDL = Atom \<P> ("_\<^sup>d") | Neg DDL ("\<not>\<^sup>d") | Impl DDL DDL (infixr "\<rightarrow>\<^sup>d" 93) | Box DDL ("\<box>\<^sup>d") | Circ DDL DDL ("\<circle>\<^sup>d'(_'/_')")
+
   \<comment>\<open>Logical connectives\<close>
   definition Or (infixr "\<or>\<^sup>d" 92) where "\<phi> \<or>\<^sup>d \<psi> \<equiv> \<not>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<psi>"
   definition And (infixr "\<and>\<^sup>d" 95) where "\<phi> \<and>\<^sup>d \<psi> \<equiv> \<not>\<^sup>d(\<phi> \<rightarrow>\<^sup>d \<not>\<^sup>d\<psi>)"
+  definition Iff (infixr "\<longleftrightarrow>\<^sup>d" 100) where "\<phi> \<longleftrightarrow>\<^sup>d \<psi> \<equiv> (\<phi> \<rightarrow>\<^sup>d \<psi>) \<and>\<^sup>d (\<psi> \<rightarrow>\<^sup>d \<phi>)"
   definition Dia ("\<diamond>\<^sup>d_") where "\<diamond>\<^sup>d\<phi> \<equiv> \<not>\<^sup>d(\<box>\<^sup>d(\<not>\<^sup>d\<phi>))"
   definition Perm ("P\<^sup>d'(_'/_')") where "P\<^sup>d(\<psi>/\<phi>) \<equiv>  \<circle>\<^sup>d(\<not>\<^sup>d\<psi>/\<phi>)"
   definition Top ("\<top>\<^sup>d")  where  "\<top>\<^sup>d \<equiv> (p\<^sup>d \<rightarrow>\<^sup>d (p\<^sup>d))"
   definition Bot ("\<bottom>\<^sup>d") where "\<bottom>\<^sup>d \<equiv> \<not>\<^sup>d(\<top>\<^sup>d)"
   definition Obl ("\<circle>\<^sup>d_") where "\<circle>\<^sup>d\<phi> \<equiv> \<circle>\<^sup>d(\<phi>/\<top>\<^sup>d)"
   definition Pos ("P\<^sup>d_") where "P\<^sup>d\<phi> \<equiv> P\<^sup>d(\<phi>/\<top>\<^sup>d)"
+
   \<comment>\<open>Semantic logic\<close>
   primrec TruthEvaluation :: "\<W>\<Rightarrow>\<R>\<Rightarrow>\<V>\<Rightarrow>\<w>\<Rightarrow>DDL\<Rightarrow>bool" ("\<langle>_,_,_\<rangle>,_\<Turnstile>\<^sup>d_") where 
   \<comment> \<open>Relational semantics\<close>
@@ -33,7 +37,28 @@ begin
   \<comment> \<open>Here the we quantify over all worlds, not over the world set W. Should we switch it?\<close>
   | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>)) = (\<forall>s::\<w>.((\<langle>W,R,V\<rangle>,s\<Turnstile>\<^sup>d\<phi>) \<and> (\<forall>t::\<w>.((\<langle>W,R,V\<rangle>,t\<Turnstile>\<^sup>d\<phi>) \<longrightarrow> R s t)) \<longrightarrow> (\<langle>W,R,V\<rangle>,s \<Turnstile>\<^sup>d \<psi>)))"
 
+  \<comment> \<open>Classical semantics\<close>
+  primrec ClassicalEvaluation :: "(DDL \<Rightarrow> bool) \<Rightarrow> DDL \<Rightarrow> bool" ("\<langle>_\<rangle>\<Turnstile>\<^sup>c_") where
+    "(\<langle>V\<rangle>\<Turnstile>\<^sup>c (\<phi>\<^sup>d)) = V (\<phi>\<^sup>d)"
+  | "(\<langle>V\<rangle>\<Turnstile>\<^sup>c (\<not>\<^sup>d\<phi>)) = (\<not>\<langle>V\<rangle>\<Turnstile>\<^sup>c \<phi>)"
+  | "(\<langle>V\<rangle>\<Turnstile>\<^sup>c (\<phi> \<rightarrow>\<^sup>d \<psi>)) = ((\<langle>V\<rangle>\<Turnstile>\<^sup>c \<phi>) \<longrightarrow> (\<langle>V\<rangle>\<Turnstile>\<^sup>c \<psi>))"
+  | "(\<langle>V\<rangle>\<Turnstile>\<^sup>c (\<box>\<^sup>d\<phi>)) = V (\<box>\<^sup>d\<phi>)"
+  | "(\<langle>V\<rangle>\<Turnstile>\<^sup>c \<circle>\<^sup>d(\<psi>/\<phi>)) = V (\<circle>\<^sup>d(\<psi>/\<phi>))"
+
+  abbreviation "valid \<phi> \<equiv> \<forall>V::(DDL\<Rightarrow>bool).\<langle>V\<rangle>\<Turnstile>\<^sup>c \<phi>"
+
   \<comment> \<open>The proposition is provable if it is derivable using the rule schema or is an axiom schema\<close>
-inductive provable :: "DDL \<Rightarrow> bool" ("\<turnstile>\<^sup>d _") where
-    mp : "\<turnstile>\<^sup>d \<phi> \<Longrightarrow> \<turnstile>\<^sup>d (\<phi> \<rightarrow>\<^sup>d \<psi>) \<Longrightarrow> \<turnstile>\<^sup>d \<psi>"
+  inductive provable :: "DDL \<Rightarrow> bool" ("\<turnstile>\<^sup>d _") where
+    taut : "valid \<phi> \<Longrightarrow> \<turnstile>\<^sup>d \<phi>"
+  | MP : "\<turnstile>\<^sup>d \<phi> \<Longrightarrow> \<turnstile>\<^sup>d (\<phi> \<rightarrow>\<^sup>d \<psi>) \<Longrightarrow> \<turnstile>\<^sup>d \<psi>"
+  | K : "\<turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<rightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<box>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<box>\<^sup>d\<psi>) )"
+  | T : "\<turnstile>\<^sup>d (\<box>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<phi>)"
+  | 5 : "\<turnstile>\<^sup>d (\<not>\<^sup>d(\<box>\<^sup>d\<phi>) \<rightarrow>\<^sup>d \<box>\<^sup>d(\<not>\<^sup>d(\<box>\<^sup>d\<phi>)))"
+  | COK : "\<turnstile>\<^sup>d (\<circle>\<^sup>d((\<psi> \<rightarrow>\<^sup>d \<chi>)/\<phi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<psi>/\<phi>) \<rightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<phi>)))"
+  | Id : "\<turnstile>\<^sup>d \<circle>\<^sup>d(\<phi>/\<phi>)"
+  | Sh : "\<turnstile>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi> \<and>\<^sup>d \<phi>) \<rightarrow>\<^sup>d \<circle>\<^sup>d((\<psi>\<rightarrow>\<^sup>d\<chi>)/\<phi>))"
+  | Abs: "\<turnstile>\<^sup>d (\<circle>\<^sup>d(\<psi>/\<phi>) \<rightarrow>\<^sup>d \<box>\<^sup>d\<circle>\<^sup>d(\<psi>/\<phi>))"
+  | Nec : "\<turnstile>\<^sup>d (\<box>\<^sup>d\<psi> \<rightarrow>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>))"
+  | Ext : "\<turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<longleftrightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi>) \<longleftrightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<psi>)))"
+  | SqNec : "\<turnstile>\<^sup>d \<phi> \<Longrightarrow> \<turnstile>\<^sup>d (\<box>\<^sup>d\<phi>)"
 end
