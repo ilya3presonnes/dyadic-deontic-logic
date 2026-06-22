@@ -1,5 +1,5 @@
-theory DDLinHOL
-imports Main  
+theory DDLinHOL imports Main
+
 begin
   typedecl \<w>
   typedecl \<P>
@@ -7,10 +7,6 @@ begin
   type_synonym \<W> = "\<w>\<Rightarrow>bool" 
   type_synonym \<R> = "\<w>\<Rightarrow>\<w>\<Rightarrow>bool"
   type_synonym \<V>  = "\<P>\<Rightarrow>\<w>\<Rightarrow>bool" 
-  \<comment>\<open>Relation properties\<close>
-  abbreviation(input) "reflexive \<equiv> \<lambda>R::\<R>. \<forall>x. R x x"
-  abbreviation(input) "symmetric \<equiv> \<lambda>R::\<R>. \<forall>x y. R x y \<longrightarrow> R y x"
-  abbreviation(input) "transitive       \<equiv> \<lambda>R::\<R>. \<forall>x y z. (R x y \<and> R y z)  \<longrightarrow> R x z"
 
   \<comment> \<open>Syntax of DDL\<close>
   datatype DDL = Atom \<P> ("_\<^sup>d") | Neg DDL ("\<not>\<^sup>d") | Impl DDL DDL (infixr "\<rightarrow>\<^sup>d" 93) | Box DDL ("\<box>\<^sup>d") | Circ DDL DDL ("\<circle>\<^sup>d'(_'/_')")
