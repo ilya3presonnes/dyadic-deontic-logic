@@ -33,6 +33,9 @@ begin
   \<comment> \<open>Here the we quantify over all worlds, not over the world set W. Should we switch it?\<close>
   | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>)) = (\<forall>s::\<w>.((\<langle>W,R,V\<rangle>,s\<Turnstile>\<^sup>d\<phi>) \<and> (\<forall>t::\<w>.((\<langle>W,R,V\<rangle>,t\<Turnstile>\<^sup>d\<phi>) \<longrightarrow> R s t)) \<longrightarrow> (\<langle>W,R,V\<rangle>,s \<Turnstile>\<^sup>d \<psi>)))"
 
+  abbreviation valid :: "DDL \<Rightarrow> bool" ("\<Turnstile>\<^sup>d _") where 
+    "\<Turnstile>\<^sup>d \<phi> \<equiv> \<forall>W::\<W>.\<forall>R::\<R>.\<forall>V::\<V>.\<forall>w::\<w>. \<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d\<phi>"
+
   \<comment> \<open>Classical semantics\<close>
   primrec ClassicalEvaluation :: "(DDL \<Rightarrow> bool) \<Rightarrow> DDL \<Rightarrow> bool" ("\<langle>_\<rangle>\<Turnstile>\<^sup>c_") where
     "(\<langle>V\<rangle>\<Turnstile>\<^sup>c (\<phi>\<^sup>d)) = V (\<phi>\<^sup>d)"
@@ -41,11 +44,12 @@ begin
   | "(\<langle>V\<rangle>\<Turnstile>\<^sup>c (\<box>\<^sup>d\<phi>)) = V (\<box>\<^sup>d\<phi>)"
   | "(\<langle>V\<rangle>\<Turnstile>\<^sup>c \<circle>\<^sup>d(\<psi>/\<phi>)) = V (\<circle>\<^sup>d(\<psi>/\<phi>))"
 
-  abbreviation "valid \<phi> \<equiv> \<forall>V::(DDL\<Rightarrow>bool).\<langle>V\<rangle>\<Turnstile>\<^sup>c \<phi>"
+  abbreviation validProp :: "DDL \<Rightarrow> bool" ("\<Turnstile>\<^sup>c\<^sup>l")  
+    where "(\<Turnstile>\<^sup>c\<^sup>l \<phi>) \<equiv> \<forall>V::(DDL\<Rightarrow>bool).\<langle>V\<rangle>\<Turnstile>\<^sup>c \<phi>"
 
   \<comment> \<open>The proposition is provable if it is derivable using the rule schema or is an axiom schema\<close>
   inductive provable :: "DDL \<Rightarrow> bool" ("\<turnstile>\<^sup>d _") where
-    taut : "valid \<phi> \<Longrightarrow> \<turnstile>\<^sup>d \<phi>"
+    taut : "validProp \<phi> \<Longrightarrow> \<turnstile>\<^sup>d \<phi>"
   | MP : "\<turnstile>\<^sup>d \<phi> \<Longrightarrow> \<turnstile>\<^sup>d (\<phi> \<rightarrow>\<^sup>d \<psi>) \<Longrightarrow> \<turnstile>\<^sup>d \<psi>"
   | K : "\<turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<rightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<box>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<box>\<^sup>d\<psi>) )"
   | T : "\<turnstile>\<^sup>d (\<box>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<phi>)"
@@ -57,4 +61,9 @@ begin
   | Nec : "\<turnstile>\<^sup>d (\<box>\<^sup>d\<psi> \<rightarrow>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>))"
   | Ext : "\<turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<longleftrightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi>) \<longleftrightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<psi>)))"
   | SqNec : "\<turnstile>\<^sup>d \<phi> \<Longrightarrow> \<turnstile>\<^sup>d (\<box>\<^sup>d\<phi>)"
+
+  \<comment> \<open>Soundness and completeness\<close>
+  theorem soundness: "(\<turnstile>\<^sup>d \<phi>) \<longrightarrow> (\<Turnstile>\<^sup>d \<phi>)" oops
+  theorem completness: "(\<Turnstile>\<^sup>d \<phi>) \<longrightarrow> (\<turnstile>\<^sup>d \<phi>)" oops
+
 end
