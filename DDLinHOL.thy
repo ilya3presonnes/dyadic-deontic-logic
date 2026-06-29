@@ -29,11 +29,11 @@ begin
   | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d (\<not>\<^sup>d\<phi>)) = (\<not>\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d \<phi>)"
   | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d (\<psi> \<rightarrow>\<^sup>d \<phi>)) = ((\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d \<psi>) \<longrightarrow> (\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d \<phi>))"
   \<comment> \<open>Preference semantics\<close>
-  | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d (\<box>\<^sup>d\<phi>)) = (\<forall>t::\<w>.((W t = True) \<longrightarrow> \<langle>W,R,V\<rangle>,t \<Turnstile>\<^sup>d \<phi>))"
+  | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d (\<box>\<^sup>d\<phi>)) = (\<forall>t::\<w>.((W t) \<longrightarrow> \<langle>W,R,V\<rangle>,t \<Turnstile>\<^sup>d \<phi>))"
   | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>)) = (\<forall>s::\<w>. W s \<longrightarrow>((\<langle>W,R,V\<rangle>,s\<Turnstile>\<^sup>d\<phi>) \<and> (\<forall>t::\<w>.(W t \<longrightarrow> (\<langle>W,R,V\<rangle>,t\<Turnstile>\<^sup>d\<phi>) \<longrightarrow> R s t)) \<longrightarrow> (\<langle>W,R,V\<rangle>,s \<Turnstile>\<^sup>d \<psi>)))"
 
   abbreviation valid :: "DDL \<Rightarrow> bool" ("\<Turnstile>\<^sup>d _") 
-    where "\<Turnstile>\<^sup>d \<phi> \<equiv> \<forall>W::\<W>.\<forall>R::\<R>.\<forall>V::\<V>.\<forall>w::\<w>. \<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d\<phi>"
+    where "\<Turnstile>\<^sup>d \<phi> \<equiv> \<forall>W R V.\<forall>w::\<w>.(\<forall>w. W w \<longrightarrow> \<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d\<phi>)"
 
   \<comment> \<open>Classical semantics\<close>
   primrec ClassicalEvaluation :: "(DDL \<Rightarrow> bool) \<Rightarrow> DDL \<Rightarrow> bool" ("\<langle>_\<rangle>\<Turnstile>\<^sup>c\<^sup>l_") where
@@ -66,7 +66,7 @@ begin
   proof (induction pred: provable)
     \<comment> \<open>Tautology\<close>
     fix \<phi> assume "\<Turnstile>\<^sup>c\<^sup>l \<phi>"
-    show "\<Turnstile>\<^sup>d \<phi>" sorry
+    show "\<Turnstile>\<^sup>d \<phi>" nitpick sorry
   next
     \<comment> \<open>Modem ponens\<close>
     fix \<phi> \<psi> 
@@ -81,7 +81,8 @@ begin
   next
     \<comment> \<open>Axiom T\<close>
     fix \<phi>
-    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<phi>)" nitpick sorry \<comment> \<open>Found counter example\<close>
+    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<phi>)" \<comment> \<open>Hammered\<close>  \<comment> \<open>Found counter example\<close>
+      by simp
   next
     \<comment> \<open>Axiom S5\<close>
     fix \<phi>
@@ -115,7 +116,7 @@ begin
   next
     \<comment> \<open>Extentionality rule\<close>
     fix \<phi> \<psi> \<chi>
-    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<longleftrightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi>) \<longleftrightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<psi>)))" sledgehammer
+    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<longleftrightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi>) \<longleftrightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<psi>)))" \<comment> \<open>Hammered\<close> 
       by (smt (verit) And_def Iff_def TruthEvaluation.simps(2,3,4,5))
   next 
     \<comment> \<open>Rule of necessitation of settled states\<close>  
