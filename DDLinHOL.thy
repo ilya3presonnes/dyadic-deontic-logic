@@ -30,8 +30,7 @@ begin
   | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d (\<psi> \<rightarrow>\<^sup>d \<phi>)) = ((\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d \<psi>) \<longrightarrow> (\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d \<phi>))"
   \<comment> \<open>Preference semantics\<close>
   | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d (\<box>\<^sup>d\<phi>)) = (\<forall>t::\<w>.((W t = True) \<longrightarrow> \<langle>W,R,V\<rangle>,t \<Turnstile>\<^sup>d \<phi>))"
-  \<comment> \<open>Here the we quantify over all worlds, not over the world set W. Should we switch it?\<close>
-  | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>)) = (\<forall>s::\<w>. W s \<longrightarrow>((\<langle>W,R,V\<rangle>,s\<Turnstile>\<^sup>d\<phi>) \<and> (\<forall>t::\<w>.((\<langle>W,R,V\<rangle>,t\<Turnstile>\<^sup>d\<phi>) \<longrightarrow> R s t)) \<longrightarrow> (\<langle>W,R,V\<rangle>,s \<Turnstile>\<^sup>d \<psi>)))"
+  | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>)) = (\<forall>s::\<w>. W s \<longrightarrow>((\<langle>W,R,V\<rangle>,s\<Turnstile>\<^sup>d\<phi>) \<and> (\<forall>t::\<w>.(W t \<longrightarrow> (\<langle>W,R,V\<rangle>,t\<Turnstile>\<^sup>d\<phi>) \<longrightarrow> R s t)) \<longrightarrow> (\<langle>W,R,V\<rangle>,s \<Turnstile>\<^sup>d \<psi>)))"
 
   abbreviation valid :: "DDL \<Rightarrow> bool" ("\<Turnstile>\<^sup>d _") 
     where "\<Turnstile>\<^sup>d \<phi> \<equiv> \<forall>W::\<W>.\<forall>R::\<R>.\<forall>V::\<V>.\<forall>w::\<w>. \<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d\<phi>"
@@ -116,10 +115,8 @@ begin
   next
     \<comment> \<open>Extentionality rule\<close>
     fix \<phi> \<psi> \<chi>
-    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<longleftrightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi>) \<longleftrightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<psi>)))" proof (intro allI)
-      fix W R V w
-      show "\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<longleftrightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi>) \<longleftrightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<psi>)))" sorry
-    qed
+    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<longleftrightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi>) \<longleftrightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<psi>)))" sledgehammer
+      by (smt (verit) And_def Iff_def TruthEvaluation.simps(2,3,4,5))
   next 
     \<comment> \<open>Rule of necessitation of settled states\<close>  
     fix \<phi>
