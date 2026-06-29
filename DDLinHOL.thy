@@ -31,7 +31,7 @@ begin
   \<comment> \<open>Preference semantics\<close>
   | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d (\<box>\<^sup>d\<phi>)) = (\<forall>t::\<w>.((W t = True) \<longrightarrow> \<langle>W,R,V\<rangle>,t \<Turnstile>\<^sup>d \<phi>))"
   \<comment> \<open>Here the we quantify over all worlds, not over the world set W. Should we switch it?\<close>
-  | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>)) = (\<forall>s::\<w>.((\<langle>W,R,V\<rangle>,s\<Turnstile>\<^sup>d\<phi>) \<and> (\<forall>t::\<w>.((\<langle>W,R,V\<rangle>,t\<Turnstile>\<^sup>d\<phi>) \<longrightarrow> R s t)) \<longrightarrow> (\<langle>W,R,V\<rangle>,s \<Turnstile>\<^sup>d \<psi>)))"
+  | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>)) = (\<forall>s::\<w>. W s \<longrightarrow>((\<langle>W,R,V\<rangle>,s\<Turnstile>\<^sup>d\<phi>) \<and> (\<forall>t::\<w>.((\<langle>W,R,V\<rangle>,t\<Turnstile>\<^sup>d\<phi>) \<longrightarrow> R s t)) \<longrightarrow> (\<langle>W,R,V\<rangle>,s \<Turnstile>\<^sup>d \<psi>)))"
 
   abbreviation valid :: "DDL \<Rightarrow> bool" ("\<Turnstile>\<^sup>d _") 
     where "\<Turnstile>\<^sup>d \<phi> \<equiv> \<forall>W::\<W>.\<forall>R::\<R>.\<forall>V::\<V>.\<forall>w::\<w>. \<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d\<phi>"
@@ -111,11 +111,15 @@ begin
   next
     \<comment> \<open>Necessitation axiom\<close>  
     fix \<phi> \<psi>
-    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d\<psi> \<rightarrow>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>))" sorry
+    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d\<psi> \<rightarrow>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>))" \<comment> \<open>Hammered\<close>
+      by simp
   next
     \<comment> \<open>Extentionality rule\<close>
     fix \<phi> \<psi> \<chi>
-    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<longleftrightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi>) \<longleftrightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<psi>)))" sorry
+    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<longleftrightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi>) \<longleftrightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<psi>)))" proof (intro allI)
+      fix W R V w
+      show "\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<longleftrightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi>) \<longleftrightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<psi>)))" sorry
+    qed
   next 
     \<comment> \<open>Rule of necessitation of settled states\<close>  
     fix \<phi>
@@ -124,6 +128,14 @@ begin
       by (metis \<open>\<Turnstile>\<^sup>d \<phi>\<close> TruthEvaluation.simps(4))
   qed
     
-  theorem completness: "(\<Turnstile>\<^sup>d \<phi>) \<longrightarrow> (\<turnstile>\<^sup>d \<phi>)" oops
+  theorem completness: "(\<Turnstile>\<^sup>d \<phi>) \<longrightarrow> (\<turnstile>\<^sup>d \<phi>)" \<comment> \<open>Hammered\<close>
+  proof -
+    have "\<forall>d w b ba. \<langle>\<lambda>w. False,\<lambda>w wa. ba,\<lambda>p w. b\<rangle>,w\<Turnstile>\<^sup>dd"
+      by (metis (no_types) T TruthEvaluation.simps(3,4) soundness)
+    then show ?thesis
+      by (metis (no_types) TruthEvaluation.simps(1))
+  qed
+
+theorem sound_and_complete: "( \<turnstile>\<^sup>d \<phi>) \<longleftrightarrow> ( \<Turnstile>\<^sup>d \<phi>)" using completness soundness by blast
 
 end
