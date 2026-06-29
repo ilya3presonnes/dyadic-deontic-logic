@@ -33,37 +33,97 @@ begin
   \<comment> \<open>Here the we quantify over all worlds, not over the world set W. Should we switch it?\<close>
   | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>)) = (\<forall>s::\<w>.((\<langle>W,R,V\<rangle>,s\<Turnstile>\<^sup>d\<phi>) \<and> (\<forall>t::\<w>.((\<langle>W,R,V\<rangle>,t\<Turnstile>\<^sup>d\<phi>) \<longrightarrow> R s t)) \<longrightarrow> (\<langle>W,R,V\<rangle>,s \<Turnstile>\<^sup>d \<psi>)))"
 
-  abbreviation valid :: "DDL \<Rightarrow> bool" ("\<Turnstile>\<^sup>d _") where 
-    "\<Turnstile>\<^sup>d \<phi> \<equiv> \<forall>W::\<W>.\<forall>R::\<R>.\<forall>V::\<V>.\<forall>w::\<w>. \<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d\<phi>"
+  abbreviation valid :: "DDL \<Rightarrow> bool" ("\<Turnstile>\<^sup>d _") 
+    where "\<Turnstile>\<^sup>d \<phi> \<equiv> \<forall>W::\<W>.\<forall>R::\<R>.\<forall>V::\<V>.\<forall>w::\<w>. \<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d\<phi>"
 
   \<comment> \<open>Classical semantics\<close>
-  primrec ClassicalEvaluation :: "(DDL \<Rightarrow> bool) \<Rightarrow> DDL \<Rightarrow> bool" ("\<langle>_\<rangle>\<Turnstile>\<^sup>c_") where
-    "(\<langle>V\<rangle>\<Turnstile>\<^sup>c (\<phi>\<^sup>d)) = V (\<phi>\<^sup>d)"
-  | "(\<langle>V\<rangle>\<Turnstile>\<^sup>c (\<not>\<^sup>d\<phi>)) = (\<not>\<langle>V\<rangle>\<Turnstile>\<^sup>c \<phi>)"
-  | "(\<langle>V\<rangle>\<Turnstile>\<^sup>c (\<phi> \<rightarrow>\<^sup>d \<psi>)) = ((\<langle>V\<rangle>\<Turnstile>\<^sup>c \<phi>) \<longrightarrow> (\<langle>V\<rangle>\<Turnstile>\<^sup>c \<psi>))"
-  | "(\<langle>V\<rangle>\<Turnstile>\<^sup>c (\<box>\<^sup>d\<phi>)) = V (\<box>\<^sup>d\<phi>)"
-  | "(\<langle>V\<rangle>\<Turnstile>\<^sup>c \<circle>\<^sup>d(\<psi>/\<phi>)) = V (\<circle>\<^sup>d(\<psi>/\<phi>))"
+  primrec ClassicalEvaluation :: "(DDL \<Rightarrow> bool) \<Rightarrow> DDL \<Rightarrow> bool" ("\<langle>_\<rangle>\<Turnstile>\<^sup>c\<^sup>l_") where
+    "(\<langle>V\<rangle>\<Turnstile>\<^sup>c\<^sup>l (\<phi>\<^sup>d)) = V (\<phi>\<^sup>d)"
+  | "(\<langle>V\<rangle>\<Turnstile>\<^sup>c\<^sup>l (\<not>\<^sup>d\<phi>)) = (\<not>\<langle>V\<rangle>\<Turnstile>\<^sup>c\<^sup>l \<phi>)"
+  | "(\<langle>V\<rangle>\<Turnstile>\<^sup>c\<^sup>l (\<phi> \<rightarrow>\<^sup>d \<psi>)) = ((\<langle>V\<rangle>\<Turnstile>\<^sup>c\<^sup>l \<phi>) \<longrightarrow> (\<langle>V\<rangle>\<Turnstile>\<^sup>c\<^sup>l \<psi>))"
+  | "(\<langle>V\<rangle>\<Turnstile>\<^sup>c\<^sup>l (\<box>\<^sup>d\<phi>)) = V (\<box>\<^sup>d\<phi>)"
+  | "(\<langle>V\<rangle>\<Turnstile>\<^sup>c\<^sup>l \<circle>\<^sup>d(\<psi>/\<phi>)) = V (\<circle>\<^sup>d(\<psi>/\<phi>))"
 
-  abbreviation validProp :: "DDL \<Rightarrow> bool" ("\<Turnstile>\<^sup>c\<^sup>l")  
-    where "(\<Turnstile>\<^sup>c\<^sup>l \<phi>) \<equiv> \<forall>V::(DDL\<Rightarrow>bool).\<langle>V\<rangle>\<Turnstile>\<^sup>c \<phi>"
+  abbreviation validProp :: "DDL \<Rightarrow> bool" ("\<Turnstile>\<^sup>c\<^sup>l _")  
+    where "(\<Turnstile>\<^sup>c\<^sup>l \<phi>) \<equiv> \<forall>V::(DDL\<Rightarrow>bool).\<langle>V\<rangle>\<Turnstile>\<^sup>c\<^sup>l\<phi>"
 
   \<comment> \<open>The proposition is provable if it is derivable using the rule schema or is an axiom schema\<close>
   inductive provable :: "DDL \<Rightarrow> bool" ("\<turnstile>\<^sup>d _") where
-    taut : "validProp \<phi> \<Longrightarrow> \<turnstile>\<^sup>d \<phi>"
+    taut : "\<Turnstile>\<^sup>c\<^sup>l \<phi> \<Longrightarrow> \<turnstile>\<^sup>d \<phi>"
   | MP : "\<turnstile>\<^sup>d \<phi> \<Longrightarrow> \<turnstile>\<^sup>d (\<phi> \<rightarrow>\<^sup>d \<psi>) \<Longrightarrow> \<turnstile>\<^sup>d \<psi>"
   | K : "\<turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<rightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<box>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<box>\<^sup>d\<psi>) )"
   | T : "\<turnstile>\<^sup>d (\<box>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<phi>)"
   | 5 : "\<turnstile>\<^sup>d (\<not>\<^sup>d(\<box>\<^sup>d\<phi>) \<rightarrow>\<^sup>d \<box>\<^sup>d(\<not>\<^sup>d(\<box>\<^sup>d\<phi>)))"
   | COK : "\<turnstile>\<^sup>d (\<circle>\<^sup>d((\<psi> \<rightarrow>\<^sup>d \<chi>)/\<phi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<psi>/\<phi>) \<rightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<phi>)))"
   | Id : "\<turnstile>\<^sup>d \<circle>\<^sup>d(\<phi>/\<phi>)"
-  | Sh : "\<turnstile>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi> \<and>\<^sup>d \<phi>) \<rightarrow>\<^sup>d \<circle>\<^sup>d((\<psi>\<rightarrow>\<^sup>d\<chi>)/\<phi>))"
+  | Sh : "\<turnstile>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi> \<and>\<^sup>d \<psi>) \<rightarrow>\<^sup>d \<circle>\<^sup>d((\<psi>\<rightarrow>\<^sup>d\<chi>)/\<phi>))"
   | Abs: "\<turnstile>\<^sup>d (\<circle>\<^sup>d(\<psi>/\<phi>) \<rightarrow>\<^sup>d \<box>\<^sup>d\<circle>\<^sup>d(\<psi>/\<phi>))"
   | Nec : "\<turnstile>\<^sup>d (\<box>\<^sup>d\<psi> \<rightarrow>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>))"
   | Ext : "\<turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<longleftrightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi>) \<longleftrightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<psi>)))"
   | SqNec : "\<turnstile>\<^sup>d \<phi> \<Longrightarrow> \<turnstile>\<^sup>d (\<box>\<^sup>d\<phi>)"
 
   \<comment> \<open>Soundness and completeness\<close>
-  theorem soundness: "(\<turnstile>\<^sup>d \<phi>) \<longrightarrow> (\<Turnstile>\<^sup>d \<phi>)" oops
+  theorem soundness: "(\<turnstile>\<^sup>d \<phi>) \<Longrightarrow> (\<Turnstile>\<^sup>d \<phi>)" 
+  proof (induction pred: provable)
+    \<comment> \<open>Tautology\<close>
+    fix \<phi> assume "\<Turnstile>\<^sup>c\<^sup>l \<phi>"
+    show "\<Turnstile>\<^sup>d \<phi>" sorry
+  next
+    \<comment> \<open>Modem ponens\<close>
+    fix \<phi> \<psi> 
+    assume  " \<Turnstile>\<^sup>d \<phi>" "\<Turnstile>\<^sup>d (\<phi> \<rightarrow>\<^sup>d \<psi>)"
+    show "\<Turnstile>\<^sup>d \<psi>" \<comment> \<open>Hammered\<close> 
+      by (metis \<open>\<Turnstile>\<^sup>d \<phi>\<close> TruthEvaluation.simps(3) \<open>\<Turnstile>\<^sup>d (\<phi> \<rightarrow>\<^sup>d \<psi>)\<close>)
+  next
+    \<comment> \<open>Axiom K\<close>
+    fix \<phi> \<psi>
+    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<rightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<box>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<box>\<^sup>d\<psi>))" \<comment> \<open>Hammered\<close> 
+      by simp
+  next
+    \<comment> \<open>Axiom T\<close>
+    fix \<phi>
+    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<phi>)" nitpick sorry \<comment> \<open>Found counter example\<close>
+  next
+    \<comment> \<open>Axiom S5\<close>
+    fix \<phi>
+    show "\<Turnstile>\<^sup>d (\<not>\<^sup>d(\<box>\<^sup>d\<phi>) \<rightarrow>\<^sup>d \<box>\<^sup>d(\<not>\<^sup>d(\<box>\<^sup>d\<phi>)))" \<comment> \<open>Hammered\<close> 
+      by auto
+  next 
+    \<comment> \<open>Axiom of Conditional Obligation K\<close>
+    fix \<phi> \<psi> \<chi>
+    show "\<Turnstile>\<^sup>d (\<circle>\<^sup>d((\<psi> \<rightarrow>\<^sup>d \<chi>)/\<phi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<psi>/\<phi>) \<rightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<phi>)))" \<comment> \<open>Hammered\<close> 
+      by fastforce
+  next 
+    \<comment> \<open>Identity axiom\<close>
+    fix \<phi>
+    show "\<Turnstile>\<^sup>d \<circle>\<^sup>d(\<phi>/\<phi>)" \<comment> \<open>Hammered\<close> 
+      by simp
+  next
+    \<comment> \<open>Shoham axiom\<close>
+    fix \<psi> \<chi> \<phi>
+    show "\<Turnstile>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi> \<and>\<^sup>d \<psi>) \<rightarrow>\<^sup>d \<circle>\<^sup>d((\<psi>\<rightarrow>\<^sup>d\<chi>)/\<phi>))" \<comment> \<open>Hammered\<close>
+      by (simp add: And_def)
+  next
+    \<comment> \<open>Absoluteness\<close>
+    fix \<phi> \<psi>
+    show "\<Turnstile>\<^sup>d (\<circle>\<^sup>d(\<psi>/\<phi>) \<rightarrow>\<^sup>d \<box>\<^sup>d\<circle>\<^sup>d(\<psi>/\<phi>))" \<comment> \<open>Hammered\<close>
+      by auto
+  next
+    \<comment> \<open>Necessitation axiom\<close>  
+    fix \<phi> \<psi>
+    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d\<psi> \<rightarrow>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>))" sorry
+  next
+    \<comment> \<open>Extentionality rule\<close>
+    fix \<phi> \<psi> \<chi>
+    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<longleftrightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi>) \<longleftrightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<psi>)))" sorry
+  next 
+    \<comment> \<open>Rule of necessitation of settled states\<close>  
+    fix \<phi>
+    assume "\<Turnstile>\<^sup>d \<phi>"
+    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d\<phi>)" \<comment> \<open>Hammered\<close>
+      by (metis \<open>\<Turnstile>\<^sup>d \<phi>\<close> TruthEvaluation.simps(4))
+  qed
+    
   theorem completness: "(\<Turnstile>\<^sup>d \<phi>) \<longrightarrow> (\<turnstile>\<^sup>d \<phi>)" oops
 
 end
