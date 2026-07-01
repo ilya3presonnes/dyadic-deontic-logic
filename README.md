@@ -1,6 +1,20 @@
 # About the project
 <!-- TODO: add links to the papers -->
 This project contains deep embbedding of deontic dyadic logic for conditional normative reasoning following [The LogiKey framework by Benzmüller et al.]. The embedding is done in theorem prover **Isabelle/HOL**, to follow the LogiKey framework, however embedding in Lean is also considered. 
+
+## Project code of conduct
+Please use the informative style for commit messages: 
+
+- The headline containing the tag, describing the type of change commit brings
+	* `feat:` used for new blocks of code, funciton, datatypes, definition, etc. For addition of proofs use the nest tag
+	* `proof:` used when new proof or work on new proof is done. 
+	* `fix:` used when commit introduces fixed to code or proofs
+	* `refactor:` changing the existing code, with minimal new features, only changing the previous logic
+	* `style:` used when commit changes the visual of code (indendation/blokcs). Mostly used when no refactoring happened, and signifies that the commit can be ignored, no logic or real changes are introduced. If any other changes (new definitions, renames, etc.) happen, use rafactor tag  
+	* `docs:` used when editing documentation in code, or changing `README`, papers
+- The commit body after a line separating head from body. The body contains the summary of changes, their nuances and reasons why changes where needed
+- Optional footer, also with a line separating then. Footer should contain tags, however no tags exists on this moment. 
+
 # Roadmap
 - [x] Implement DDL syntax via an inductive type
 - [x] Implement preference semantics with optimal set via an eliminationa and computation rules
