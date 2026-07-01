@@ -86,7 +86,7 @@ begin
     assume  " \<Turnstile>\<^sup>d \<phi>" "\<Turnstile>\<^sup>d (\<phi> \<rightarrow>\<^sup>d \<psi>)"
     show "\<Turnstile>\<^sup>d \<psi>"
     by (smt TruthEvaluation.simps(3)
-          \<open>\<forall>W R V w. (W \<noteq> \<emptyset> \<and> reflexive R \<and> transitive R \<and> totalness R) \<and> (\<forall>w. W w) \<longrightarrow> \<langle>W,R,V\<rangle>,w\<Turnstile>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<psi>\<close>
+          \<open>\<forall>W R V w. (W \<noteq> \<emptyset> \<and> reflexive R \<and> transitive R \<and> totalness R) \<and> (\<forall>w. W w) \<longrightarrow> \<langle>W,R,V\<rangle>,w\<Turnstile>\<^sup>d(\<phi> \<rightarrow>\<^sup>d \<psi>)\<close>
           \<open>\<forall>W R V w. (W \<noteq> \<emptyset> \<and> reflexive R \<and> transitive R \<and> totalness R) \<and> (\<forall>w. W w) \<longrightarrow> \<langle>W,R,V\<rangle>,w\<Turnstile>\<^sup>d\<phi>\<close>)
   next
     \<comment> \<open>Axiom K\<close>
@@ -131,14 +131,14 @@ begin
   next
     \<comment> \<open>Extentionality rule\<close>
     fix \<phi> \<psi> \<chi>
-    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<longleftrightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi>) \<longleftrightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<psi>)))" 
+    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<longleftrightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi>) \<longleftrightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<psi>)))" (* Hammered *)
       by (smt  And_def Iff_def TruthEvaluation.simps(2,3,4,5))
       
   next 
     \<comment> \<open>Rule of necessitation of settled states\<close>  
     fix \<phi>
     assume "\<Turnstile>\<^sup>d \<phi>"
-    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d\<phi>)" \<comment> \<open>Hammered\<close>
+    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d\<phi>)" (* Hammered *)
       by (metis \<open>\<Turnstile>\<^sup>d \<phi>\<close> TruthEvaluation.simps(4))
   qed
     
