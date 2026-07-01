@@ -43,6 +43,8 @@ begin
   | "(\<langle>V\<rangle>\<Turnstile>\<^sup>c\<^sup>l (\<box>\<^sup>d\<phi>)) = V (\<box>\<^sup>d\<phi>)"
   | "(\<langle>V\<rangle>\<Turnstile>\<^sup>c\<^sup>l \<circle>\<^sup>d(\<psi>/\<phi>)) = V (\<circle>\<^sup>d(\<psi>/\<phi>))"
 
+  lemma bridge: "(\<langle>(\<lambda>\<psi>. \<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d \<psi>)\<rangle>\<Turnstile>\<^sup>c\<^sup>l \<phi>) = (\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d \<phi>)" by induction simp_all
+
   abbreviation validProp :: "DDL \<Rightarrow> bool" ("\<Turnstile>\<^sup>c\<^sup>l _")  
     where "(\<Turnstile>\<^sup>c\<^sup>l \<phi>) \<equiv> \<forall>V::(DDL\<Rightarrow>bool).\<langle>V\<rangle>\<Turnstile>\<^sup>c\<^sup>l\<phi>"
 
@@ -64,9 +66,10 @@ begin
   \<comment> \<open>Soundness and completeness\<close>
   theorem soundness: "(\<turnstile>\<^sup>d \<phi>) \<Longrightarrow> (\<Turnstile>\<^sup>d \<phi>)" 
   proof (induction pred: provable)
-    \<comment> \<open>Tautology\<close>
-    fix \<phi> assume "\<Turnstile>\<^sup>c\<^sup>l \<phi>"
-    show "\<Turnstile>\<^sup>d \<phi>" nitpick sorry
+    \<comment> \<open>Tautology\<close> 
+    fix \<phi> assume H: "\<Turnstile>\<^sup>c\<^sup>l \<phi>"
+    show "\<Turnstile>\<^sup>d \<phi>" \<comment> \<open>Hammered\<close> 
+      using H bridge by blast
   next
     \<comment> \<open>Modem ponens\<close>
     fix \<phi> \<psi> 
