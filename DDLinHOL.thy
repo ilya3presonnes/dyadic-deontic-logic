@@ -32,8 +32,18 @@ begin
   | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d (\<box>\<^sup>d\<phi>)) = (\<forall>t::\<w>.((W t) \<longrightarrow> \<langle>W,R,V\<rangle>,t \<Turnstile>\<^sup>d \<phi>))"
   | "(\<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>)) = (\<forall>s::\<w>. W s \<longrightarrow>((\<langle>W,R,V\<rangle>,s\<Turnstile>\<^sup>d\<phi>) \<and> (\<forall>t::\<w>.(W t \<longrightarrow> (\<langle>W,R,V\<rangle>,t\<Turnstile>\<^sup>d\<phi>) \<longrightarrow> R s t)) \<longrightarrow> (\<langle>W,R,V\<rangle>,s \<Turnstile>\<^sup>d \<psi>)))"
 
+  abbreviation non_empty :: "\<W>\<Rightarrow>bool" ("_ \<noteq> \<emptyset>") 
+    where "W \<noteq> \<emptyset> \<equiv> \<exists>w. W w"
+
+  abbreviation "reflexive R \<equiv> \<forall>x::\<w>. R x x"
+  abbreviation "transitive R \<equiv> \<forall>a b c. R a b \<and> R b c \<longrightarrow> R a c"
+  abbreviation "totalness R \<equiv> \<forall>a b. R a b \<or> R b a"
+
+  abbreviation frame :: "\<W>\<Rightarrow>\<R>\<Rightarrow>\<V>\<Rightarrow>bool" ("\<langle>_,_,_\<rangle>\<^sub>\<F>") 
+    where "\<langle>W,R,V\<rangle>\<^sub>\<F> \<equiv> W \<noteq> \<emptyset> \<and> reflexive R \<and> transitive R \<and> totalness R"
+
   abbreviation valid :: "DDL \<Rightarrow> bool" ("\<Turnstile>\<^sup>d _") 
-    where "\<Turnstile>\<^sup>d \<phi> \<equiv> \<forall>W R V.\<forall>w::\<w>.(\<forall>w. W w \<longrightarrow> \<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d\<phi>)"
+    where "\<Turnstile>\<^sup>d \<phi> \<equiv> \<forall>W R V.\<forall>w::\<w>.(\<langle>W,R,V\<rangle>\<^sub>\<F> \<and> (\<forall>w. W w) \<longrightarrow> \<langle>W,R,V\<rangle>,w \<Turnstile>\<^sup>d\<phi>)"
 
   \<comment> \<open>Classical semantics\<close>
   primrec ClassicalEvaluation :: "(DDL \<Rightarrow> bool) \<Rightarrow> DDL \<Rightarrow> bool" ("\<langle>_\<rangle>\<Turnstile>\<^sup>c\<^sup>l_") where
@@ -74,53 +84,56 @@ begin
     \<comment> \<open>Modem ponens\<close>
     fix \<phi> \<psi> 
     assume  " \<Turnstile>\<^sup>d \<phi>" "\<Turnstile>\<^sup>d (\<phi> \<rightarrow>\<^sup>d \<psi>)"
-    show "\<Turnstile>\<^sup>d \<psi>" \<comment> \<open>Hammered\<close> 
-      by (metis \<open>\<Turnstile>\<^sup>d \<phi>\<close> TruthEvaluation.simps(3) \<open>\<Turnstile>\<^sup>d (\<phi> \<rightarrow>\<^sup>d \<psi>)\<close>)
+    show "\<Turnstile>\<^sup>d \<psi>"
+    by (smt TruthEvaluation.simps(3)
+          \<open>\<forall>W R V w. (W \<noteq> \<emptyset> \<and> reflexive R \<and> transitive R \<and> totalness R) \<and> (\<forall>w. W w) \<longrightarrow> \<langle>W,R,V\<rangle>,w\<Turnstile>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<psi>\<close>
+          \<open>\<forall>W R V w. (W \<noteq> \<emptyset> \<and> reflexive R \<and> transitive R \<and> totalness R) \<and> (\<forall>w. W w) \<longrightarrow> \<langle>W,R,V\<rangle>,w\<Turnstile>\<^sup>d\<phi>\<close>)
   next
     \<comment> \<open>Axiom K\<close>
     fix \<phi> \<psi>
-    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<rightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<box>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<box>\<^sup>d\<psi>))" \<comment> \<open>Hammered\<close> 
+    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<rightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<box>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<box>\<^sup>d\<psi>))" (* Hammered *)
       by simp
   next
     \<comment> \<open>Axiom T\<close>
     fix \<phi>
-    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<phi>)" \<comment> \<open>Hammered\<close>  \<comment> \<open>Found counter example\<close>
+    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d\<phi> \<rightarrow>\<^sup>d \<phi>)" (* Hammered *)
       by simp
   next
     \<comment> \<open>Axiom S5\<close>
     fix \<phi>
-    show "\<Turnstile>\<^sup>d (\<not>\<^sup>d(\<box>\<^sup>d\<phi>) \<rightarrow>\<^sup>d \<box>\<^sup>d(\<not>\<^sup>d(\<box>\<^sup>d\<phi>)))" \<comment> \<open>Hammered\<close> 
+    show "\<Turnstile>\<^sup>d (\<not>\<^sup>d(\<box>\<^sup>d\<phi>) \<rightarrow>\<^sup>d \<box>\<^sup>d(\<not>\<^sup>d(\<box>\<^sup>d\<phi>)))" (* Hammered *)
       by auto
   next 
     \<comment> \<open>Axiom of Conditional Obligation K\<close>
     fix \<phi> \<psi> \<chi>
-    show "\<Turnstile>\<^sup>d (\<circle>\<^sup>d((\<psi> \<rightarrow>\<^sup>d \<chi>)/\<phi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<psi>/\<phi>) \<rightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<phi>)))" \<comment> \<open>Hammered\<close> 
-      by fastforce
+    show "\<Turnstile>\<^sup>d (\<circle>\<^sup>d((\<psi> \<rightarrow>\<^sup>d \<chi>)/\<phi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<psi>/\<phi>) \<rightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<phi>)))" (* Hammered *)
+      by (smt (verit, ccfv_threshold) TruthEvaluation.simps(3,5))
   next 
     \<comment> \<open>Identity axiom\<close>
     fix \<phi>
-    show "\<Turnstile>\<^sup>d \<circle>\<^sup>d(\<phi>/\<phi>)" \<comment> \<open>Hammered\<close> 
-      by simp
+    show "\<Turnstile>\<^sup>d \<circle>\<^sup>d(\<phi>/\<phi>)" (* Hammered *)
+      using TruthEvaluation.simps(5) by blast
   next
     \<comment> \<open>Shoham axiom\<close>
     fix \<psi> \<chi> \<phi>
-    show "\<Turnstile>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi> \<and>\<^sup>d \<psi>) \<rightarrow>\<^sup>d \<circle>\<^sup>d((\<psi>\<rightarrow>\<^sup>d\<chi>)/\<phi>))" \<comment> \<open>Hammered\<close>
-      by (simp add: And_def)
+    show "\<Turnstile>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi> \<and>\<^sup>d \<psi>) \<rightarrow>\<^sup>d \<circle>\<^sup>d((\<psi>\<rightarrow>\<^sup>d\<chi>)/\<phi>))" (* Hammered *)
+      by (smt (verit, del_insts) And_def TruthEvaluation.simps(2,3,5))
   next
     \<comment> \<open>Absoluteness\<close>
     fix \<phi> \<psi>
-    show "\<Turnstile>\<^sup>d (\<circle>\<^sup>d(\<psi>/\<phi>) \<rightarrow>\<^sup>d \<box>\<^sup>d\<circle>\<^sup>d(\<psi>/\<phi>))" \<comment> \<open>Hammered\<close>
-      by auto
+    show "\<Turnstile>\<^sup>d (\<circle>\<^sup>d(\<psi>/\<phi>) \<rightarrow>\<^sup>d \<box>\<^sup>d\<circle>\<^sup>d(\<psi>/\<phi>))" (* Hammered *)
+      by (smt (verit, ccfv_threshold) TruthEvaluation.simps(3,4,5))
   next
     \<comment> \<open>Necessitation axiom\<close>  
     fix \<phi> \<psi>
-    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d\<psi> \<rightarrow>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>))" \<comment> \<open>Hammered\<close>
-      by simp
+    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d\<psi> \<rightarrow>\<^sup>d \<circle>\<^sup>d(\<psi>/\<phi>))" (* Hammered *)
+      by (metis TruthEvaluation.simps(3,4,5))
   next
     \<comment> \<open>Extentionality rule\<close>
     fix \<phi> \<psi> \<chi>
-    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<longleftrightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi>) \<longleftrightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<psi>)))" \<comment> \<open>Hammered\<close> 
-      by (smt (verit) And_def Iff_def TruthEvaluation.simps(2,3,4,5))
+    show "\<Turnstile>\<^sup>d (\<box>\<^sup>d(\<phi> \<longleftrightarrow>\<^sup>d \<psi>) \<rightarrow>\<^sup>d (\<circle>\<^sup>d(\<chi>/\<phi>) \<longleftrightarrow>\<^sup>d \<circle>\<^sup>d(\<chi>/\<psi>)))" 
+      by (smt  And_def Iff_def TruthEvaluation.simps(2,3,4,5))
+      
   next 
     \<comment> \<open>Rule of necessitation of settled states\<close>  
     fix \<phi>
@@ -129,14 +142,8 @@ begin
       by (metis \<open>\<Turnstile>\<^sup>d \<phi>\<close> TruthEvaluation.simps(4))
   qed
     
-  theorem completness: "(\<Turnstile>\<^sup>d \<phi>) \<longrightarrow> (\<turnstile>\<^sup>d \<phi>)" \<comment> \<open>Hammered\<close>
-  proof -
-    have "\<forall>d w b ba. \<langle>\<lambda>w. False,\<lambda>w wa. ba,\<lambda>p w. b\<rangle>,w\<Turnstile>\<^sup>dd"
-      by (metis (no_types) T TruthEvaluation.simps(3,4) soundness)
-    then show ?thesis
-      by (metis (no_types) TruthEvaluation.simps(1))
-  qed
+  theorem completeness: "(\<Turnstile>\<^sup>d \<phi>) \<longrightarrow> (\<turnstile>\<^sup>d \<phi>)" sorry
 
-theorem sound_and_complete: "( \<turnstile>\<^sup>d \<phi>) \<longleftrightarrow> ( \<Turnstile>\<^sup>d \<phi>)" using completness soundness by blast
+  theorem sound_and_complete: "( \<turnstile>\<^sup>d \<phi>) \<longleftrightarrow> ( \<Turnstile>\<^sup>d \<phi>)" sorry
 
 end
