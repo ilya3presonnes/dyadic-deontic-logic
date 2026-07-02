@@ -1,0 +1,26 @@
+\documentclass[sigconf,11pt]{acmart}
+\usepackage{amsmath}
+
+\title{Deep embedding of Dyadic Deontic Logic}
+\author{Illia Hlushakov}
+\date{}
+\newcommand{\logikey}{L{\scriptsize OGI}KE{\scriptsize Y}}
+\begin{document}
+
+\maketitle
+In the context of the {\logikey} framework \cite{LogiKey} for ethical reasoning of intelligent autonomous systems, different logics are embedded into Higher-Order Logic (HOL) using Isabelle/HOL, to support reasoning of that logic. One particular logic of interest is the Dyadic Deontic logic (DDL)\cite{book}, which formalizes conditional obligations of the form $\bigcirc(\varphi/\psi)$. The different ways to embed logic are shallow embedding, where logical connectives are expressed by means of HOL operators and deep embedding, where logic is represented as datatypes and according syntax is defined by means of HOL\cite{Benz}. A shallow embedding of DDL in Isabelle/HOL has been previously developed \cite{DDLEmbed}, which was proven to be sound and complete. 
+    
+This bachelor semester project develops a deep embedding of Dyadic Deontic Logic, and experiments with both existing shallow and deep embeddings on soundness, completeness and effectiveness of Isabelle automation. Both embeddings are tested on number of cases in normative reasoning.
+
+The goal of this project is to develop the embedding of DDL and assess which of the embeddings is more applicable in the context of {\logikey}  framework.
+
+\begin{thebibliography}{3}
+\bibitem{LogiKey} Designing Normative Theories for Ethical and Legal Reasoning: LogiKEy Framework, Methodology, and Tool Support. Benzmüller, C., Parent, X., \& van der Torre, L. Artificial Intelligence, 287: 103348. 2020.
+\bibitem{DDLEmbed} Faithful Semantical Embedding of a Dyadic Deontic Logic in HOL. Christoph Benzmüller, Ali Farjami, Xavier Parent https://arxiv.org/abs/1802.08454
+\bibitem{Benz} Faithful Logic Embeddings in HOL — Deep and Shallow. Benzmüller, C. In Barrett, C., \& Waldmann, U., editor(s), Automated Deduction – CADE-30 – 30th International Conference on Automated Deduction, Stuttgart, Germany, July 28-31, 2025, Proceedings, volume 15943, of Lecture Notes in Computer Science, pages 280–302, 2025. Springer
+\bibitem{book} Introduction to Deontic Logic and Normative Systems https://www.collegepublications.co.uk/downloads/TLR00001.pdf
+
+\end{thebibliography}
+
+\end{document}
+
