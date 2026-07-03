@@ -12,3 +12,4 @@
 *.pdf 
 
 acmart-primary/*
+.pdfpc
